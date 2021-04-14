@@ -1,0 +1,5 @@
+Lab: Lab2.c exec.c
+	gcc exec.c -o exec
+	gcc Lab2.c -o Lab2 -lncurses
+	clear
+	./Lab2

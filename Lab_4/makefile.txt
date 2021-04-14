@@ -1,0 +1,4 @@
+Lab: lab4.c
+	gcc lab4.c -o lab4 -lpthread -lncurses
+	./lab4
+	clear
