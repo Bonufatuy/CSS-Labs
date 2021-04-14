@@ -1,7 +1,0 @@
-Lab: lib.c main.c
-	gcc -fpic -c lib.c
-	gcc -shared lib.o -lrt -o libfunc.so
-	gcc main.c -c
-	gcc main.o -ldl -lpthread -L. -lfunc -o main
-	clear
-	./main
