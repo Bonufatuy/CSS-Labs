@@ -10,7 +10,7 @@ int main(){
     void *writer;
     void *reader; 
     
-    lib = dlopen("/home/bonufatuy/Рабочий стол/Labs/Lab_5/libfunc.so", RTLD_LAZY);        
+    lib = dlopen("./libfunc.so", RTLD_LAZY);        
 	
 	writer = dlsym(lib, "writer"); 
 	reader = dlsym(lib, "reader"); 
