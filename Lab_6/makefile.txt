@@ -1,0 +1,4 @@
+Lab: lab6.c
+	gcc lab6.c -o lab6 
+	clear
+	./lab6
