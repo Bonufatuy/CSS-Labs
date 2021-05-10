@@ -88,9 +88,9 @@ void *my_malloc(long numbytes) {
 
 		last_valid_address = last_valid_address + numbytes;
 
-		current_location_mcb 			= (struct data_struct *) memory_location;
+		current_location_mcb 		= (struct data_struct *) memory_location;
 		current_location_mcb->available = 0;
-		current_location_mcb->size 		= numbytes;
+		current_location_mcb->size 	= numbytes;
 		current_location_mcb->refcount  = 0;
 
 		used_memory += numbytes;
