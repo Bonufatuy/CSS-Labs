@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/sem.h>
+#include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <signal.h>
@@ -37,13 +38,21 @@ void _itoa (int n, char s[]) {
 	_reverse(s);
 }
 
+int strcmp_(char* s1, char* s2){
+	for(int i = 0; i < strlen(s2); i++){
+		if(s1[i] != s2[i])
+			return 0;
+	}
+	return 1;
+}
+
 int main(){
-	pid_t pid, mainPid = getpid();
+	pid_t pid;
 	char buf[SIZE_BUF], str[SIZE_BUF], key_buf[SIZE_BUF];
 	    
 	int key = ftok(".", 1);    
 	int sem = semget(key, 2, 0666 | IPC_CREAT);    
-    struct sembuf wait = {1, 0, SEM_UNDO};
+    struct sembuf wait_ = {1, 0, SEM_UNDO};
 	struct sembuf lock = {1, 1, SEM_UNDO};
 	struct sembuf unlock = {0, -1, SEM_UNDO};
 	
@@ -66,10 +75,16 @@ int main(){
 		default:	close(fd[0]);
 					printf("Вводите сообщения для отправки:\n");
 					while(1){		
-						semop(sem, &wait, 1);
+						semop(sem, &wait_, 1);
 						semop(sem, &lock, 1);
 												
 						fgets(str, SIZE_BUF, stdin);
+						if(strcmp_(str, "exit")){
+							kill(pid, SIGKILL);
+							wait();
+							semctl(sem, 0, IPC_RMID, 0);
+							break;
+						}
 						write(fd[1], str, SIZE_BUF);
 						
 						semop(sem, &unlock, 1);
