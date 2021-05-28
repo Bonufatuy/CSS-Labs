@@ -29,6 +29,7 @@ struct info_about_Swap_element{
 } elements_in_swap_file[MAX_ELEMENTS_SWAP_FILE];
 
 void swapping();
+int not_duplicate(void** address);
 
 void malloc_init() {
 	last_valid_address = sbrk(0);
@@ -88,9 +89,9 @@ void *my_malloc(long numbytes) {
 
 		last_valid_address = last_valid_address + numbytes;
 
-		current_location_mcb 		= (struct data_struct *) memory_location;
+		current_location_mcb 			= (struct data_struct *) memory_location;
 		current_location_mcb->available = 0;
-		current_location_mcb->size 	= numbytes;
+		current_location_mcb->size 		= numbytes;
 		current_location_mcb->refcount  = 0;
 
 		used_memory += numbytes;
@@ -101,7 +102,7 @@ void *my_malloc(long numbytes) {
 }
 											
 void swapping(){
-	int file = open("swapfile.bin", O_WRONLY | O_APPEND | O_CREAT);
+	int file = open("swapfile.bin", O_WRONLY | O_APPEND | O_CREAT, 0666);
 
 	struct data_struct *current_location_mcb;	
 	void *current_location = managed_memory_start;
@@ -113,6 +114,12 @@ void swapping(){
 
 		used_memory -= (current_location_mcb->size - SIZE_DATA_STRUCT);
 		
+		if(!not_duplicate(current_location_mcb->address)){
+			my_free(current_location);
+			current_location = current_location + current_location_mcb->size - SIZE_DATA_STRUCT;
+			continue;
+		}
+
 		elements_in_swap_file[amount_elements_Swap_file].address = current_location_mcb->address;
 		elements_in_swap_file[amount_elements_Swap_file].size = current_location_mcb->size - SIZE_DATA_STRUCT;
 		
@@ -173,6 +180,14 @@ void return_Element_ROM(void** ptr){
 		}	
 	}
 	return;
+}
+
+int not_duplicate(void** address){
+	for(int i = 0; i < MAX_ELEMENTS_SWAP_FILE; i++){
+		if(elements_in_swap_file->address == address)
+			return 0;
+	}
+	return 1;
 }
 
 void REF(void **data){
