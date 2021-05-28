@@ -240,6 +240,6 @@ int main(){
 	}
 	UNREF(Integer_20);
 
-	remove("swapfile.bin");
+	//remove("swapfile.bin");
 	return 0;
 }
