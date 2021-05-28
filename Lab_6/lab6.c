@@ -29,7 +29,7 @@ struct info_about_Swap_element{
 } elements_in_swap_file[MAX_ELEMENTS_SWAP_FILE];
 
 void swapping();
-int not_duplicate(void** address);
+int duplicate(void** address);
 
 void malloc_init() {
 	last_valid_address = sbrk(0);
@@ -114,7 +114,7 @@ void swapping(){
 
 		used_memory -= (current_location_mcb->size - SIZE_DATA_STRUCT);
 		
-		if(!not_duplicate(current_location_mcb->address)){
+		if(duplicate(current_location_mcb->address)){
 			my_free(current_location);
 			current_location = current_location + current_location_mcb->size - SIZE_DATA_STRUCT;
 			continue;
@@ -182,12 +182,12 @@ void return_Element_ROM(void** ptr){
 	return;
 }
 
-int not_duplicate(void** address){
+int duplicate(void** address){
 	for(int i = 0; i < MAX_ELEMENTS_SWAP_FILE; i++){
 		if(elements_in_swap_file->address == address)
-			return 0;
+			return 1;
 	}
-	return 1;
+	return 0;
 }
 
 void REF(void **data){
