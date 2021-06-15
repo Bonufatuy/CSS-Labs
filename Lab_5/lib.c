@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <aio.h>
+#include <errno.h>
 
 #define BUF_SIZE 512
 #define MAX_LENGHT_NAME_FILE 64
@@ -28,11 +29,9 @@ bool isTxt(char* str){
 }
 
 bool isValid(char* str){
-
-    if(!isTxt(str)) return 0;
-    if(!strcmp(str, "output.txt")) return 0;
-    
-    return  1;
+    if(!isTxt(str)) 
+        return 0;
+    return 1;
 }
 
 void* writer (void* ptr){
@@ -42,8 +41,8 @@ void* writer (void* ptr){
     char buf[BUF_SIZE];                                                        
     
     int file;                                                                  
-    file = open("output.txt", O_WRONLY | O_TRUNC | O_CREAT, 0644);                   
-                                                            
+    file = open("output", O_WRONLY | O_TRUNC | O_CREAT, 0644);                   
+
     int sem = semget(ftok(".", 1), 0, IPC_CREAT | 0666);              
     struct sembuf wait = {0, 0, SEM_UNDO};                                     
     struct sembuf lock = {0, 1, SEM_UNDO};                                     
@@ -67,7 +66,7 @@ void* writer (void* ptr){
         writeFile.aio_nbytes = symRead;     
                                        
         aio_write(&writeFile);                                                 
-        while(aio_error(&writeFile) == 115); //EINPROGRESS                           
+        while(aio_error(&writeFile) == EINPROGRESS);                  
 
         writeFile.aio_offset += symRead;                                       
         semop(sem, &unlock, 1);                                                
@@ -100,9 +99,9 @@ void* reader (void* ptr){
         if(nextFile == NULL) break;   	                                   
         if(!isValid(nextFile->d_name)) continue;
         
-		char FilePath[MAX_LENGHT_NAME_FILE] = PATH_DIRECTORY_RESOURCES; 
-		strcat(FilePath, nextFile->d_name);
-        file = open(FilePath, O_RDONLY);                               
+		char filePath[MAX_LENGHT_NAME_FILE] = PATH_DIRECTORY_RESOURCES; 
+		strcat(filePath, nextFile->d_name);
+        file = open(filePath, O_RDONLY);                              
 
         fstat(file, &stat);                                                   
         size = stat.st_size;                                                   
@@ -116,7 +115,7 @@ void* reader (void* ptr){
             else readFile.aio_nbytes = size;
 
             aio_read(&readFile);                                              
-            while(aio_error(&readFile) == 115);  // EINPROGRESS
+            while(aio_error(&readFile) == EINPROGRESS);
             
             semop(sem, &wait, 1);                                            
             semop(sem, &lock, 1);

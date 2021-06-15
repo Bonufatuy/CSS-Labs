@@ -3,6 +3,11 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <dlfcn.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdbool.h>
+
+#define BUF_SIZE 512
 
 int main(){
     void* lib;  
@@ -38,6 +43,31 @@ int main(){
     pthread_join(reader_thread, NULL);                                               
     pthread_cancel(writer_thread);                                             
 	                                                       
-    dlclose(lib);                                                           
+    dlclose(lib); 
+
+    int size, size_buf;
+    int file = open("output", O_RDONLY);
+    
+    char buf[BUF_SIZE];
+    struct stat stat;  
+
+    fstat(file, &stat);                                                   
+    size = stat.st_size;  
+
+    while(true){
+        if(size > BUF_SIZE) 
+            size_buf = BUF_SIZE;
+        else 
+            size_buf = size;
+
+        read(file, buf, size_buf);
+        printf("%s", buf);
+
+        if(size > BUF_SIZE){
+            size -= BUF_SIZE;
+        }
+        else break;  
+    }
+
     return 0;
 }
